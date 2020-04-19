@@ -19,7 +19,7 @@ pipeline {
    stage('Push Docker Image'){
      steps{
          withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'e26d40a7-65ed-4a4c-92fe-ac016ab5d94d', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD']]){
-         pushToImage(cloudcapstone, $BUILD_ID, DOCKER_USERNAME, DOCKER_PASSWORD)
+         pushToImage(cloudcapstone, 28, DOCKER_USERNAME, DOCKER_PASSWORD)
      }
     }
    }
