@@ -8,7 +8,7 @@ environment{
   stages {
     stage('Lint HTML') {
       steps {
-        sh 'tidy -q -e Docker/*.html'
+        sh 'tidy -q -e *.html'
       }
     }
     stage('Build Docker Image') {
