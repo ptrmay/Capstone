@@ -1,4 +1,9 @@
 pipeline {
+environment{
+ registry = "ptrr/capstone"
+ registryCredential = "e26d40a7-65ed-4a4c-92fe-ac016ab5d94d"
+ dockerImage = ""
+}
   agent any
   stages {
     stage('Lint HTML') {
@@ -8,21 +13,25 @@ pipeline {
     }
     stage('Build Docker Image') {
       steps {
-          withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'e26d40a7-65ed-4a4c-92fe-ac016ab5d94d', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD']]){
-          sh '''
-             cd Docker 
-             docker build -t ptrr/cloudcapstone:$BUILD_ID .
-          '''
+         script {
+           dockerImage = docker.build registry + ":$BUILD_NUMBER"
+      }   
     }
    }
- }
    stage('Push Docker Image'){
      steps{
-         withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'e26d40a7-65ed-4a4c-92fe-ac016ab5d94d', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD']]){
-         pushToImage("cloudcapstone","28", DOCKER_USERNAME, DOCKER_PASSWORD)
-     }
+         script {
+           docker.withRegistry( '', registryCredential ) {
+           dockerImage.push()
+            }
+        }
     }
    }
+   stage('Cleaning up') {
+    steps{
+       sh "docker rmi $registry:$BUILD_NUMBER"
+   }
   }
+ }
 }
 
