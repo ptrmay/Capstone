@@ -18,7 +18,7 @@ pipeline {
  }
    stage('Push Docker Image'){
      steps{
-         withDockerRegistry([credentialsId: "e26d40a7-65ed-4a4c-92fe-ac016ab5d94d", url: "https://hub.docker.com/u/ptrr" ]){
+         withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'e26d40a7-65ed-4a4c-92fe-ac016ab5d94d', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD']]){
          sh '''
             docker push ptrr/cloudcapstone
          '''
