@@ -29,7 +29,7 @@ environment{
    }
    stage('Deploying') {
        steps{
-        withAWS(credentials='aws-credentials', region: 'eu-central-1'){
+        withAWS(credentials:'aws-credentials', region: 'eu-central-1'){
       sh "aws eks --region eu-central-1 update-kubeconfig --name capstone1"
        }
       }
