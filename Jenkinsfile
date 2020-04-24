@@ -28,7 +28,7 @@ environment{
     }
    }
    stage('Deploying') {
-      sh "aws eks --region eu-central-1 update kubeconfig --name capstone"
+      sh "aws eks --region eu-central-1 update-kubeconfig --name capstone1"
       }
    stage('Cleaning up'){
     steps{
