@@ -4,7 +4,7 @@ pipeline {
     stage('build cluster') {
       steps {
         sh 'eksctl create cluster \
---name capstone \
+--name capstone1 \
 --region eu-central-1 \
 --nodegroup-name standard-workers \
 --node-type t3.medium \
