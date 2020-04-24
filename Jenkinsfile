@@ -1,7 +1,7 @@
 pipeline {
   agent any
   stages {
-    stage('Lint HTML') {
+    stage('build cluster') {
       steps {
         sh 'eksctl create cluster \
 --name capstone \
@@ -10,7 +10,7 @@ pipeline {
 --node-type t3.medium \
 --nodes 3 \
 --nodes-min 1 \
---nodes-max 4 \'
+--nodes-max 4 '
       }
     }
   }
