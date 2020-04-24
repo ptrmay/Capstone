@@ -30,6 +30,7 @@ environment{
    stage('Deploying') {
        steps{
         withAWS(credentials:'capstone', region: 'eu-central-1'){
+      sh "pip install awscli"
       sh "aws eks --region eu-central-1 update-kubeconfig --name capstone1"
        }
       }
