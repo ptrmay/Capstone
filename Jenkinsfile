@@ -22,7 +22,7 @@ environment{
      steps{
          script {
            docker.withRegistry( '', registryCredential ) {
-           dockerImage.push()
+           dockerImag.push()
             }
         }
     }
