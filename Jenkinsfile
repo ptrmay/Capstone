@@ -27,7 +27,10 @@ environment{
         }
     }
    }
-   stage('Cleaning up') {
+   stage('Deploying') {
+      sh "aws eks --region eu-central-1 update kubeconfig --name capstone"
+      }
+   stage('Cleaning up'){
     steps{
        sh "docker rmi $registry:$BUILD_NUMBER"
    }
