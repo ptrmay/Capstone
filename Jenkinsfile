@@ -30,7 +30,7 @@ environment{
    stage('Deploying') {
        steps{
         withAWS(credentials:'capstone', region: 'eu-central-1'){
-      sh "sudo /home/ubuntu/.local/bin/aws eks --region eu-central-1 update-kubeconfig --name capstone1"
+      sh "aws eks --region eu-central-1 update-kubeconfig --name capstone1"
        }
       }
      }
