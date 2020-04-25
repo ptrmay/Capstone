@@ -35,6 +35,8 @@ environment{
         withAWS(credentials:'capstone', region: 'eu-central-1'){
       sh "aws eks --region eu-central-1 update-kubeconfig --name capstone2"
       sh "kubectl apply -f /home/ubuntu/Capstone/Capstone/blue/blue-controller.json"
+      sh "kubectl apply -f /home/ubuntu/Capstone/Capstone/green/green-controller.json"
+      sh "kubectl apply -f /home/ubuntu/Capstone/Capstone/blue-green-service.json"
       sh "kubectl get nodes"
       sh "kubectl get pods" 
        }
