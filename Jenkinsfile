@@ -1,6 +1,7 @@
 pipeline {
 environment{
- registry = "ptrr/capstone"
+ registry_blue = "ptrr/capstone_blue"
+ registry_green = "ptrr/capstone_green"
  registryCredential = "e26d40a7-65ed-4a4c-92fe-ac016ab5d94d"
  dockerImage = ""
 }
@@ -14,7 +15,8 @@ environment{
     stage('Build Docker Image') {
       steps {
          script {
-           dockerImage = docker.build registry + ":$BUILD_NUMBER"
+           dockerImage_blue = docker.build registry_blue + ":$BUILD_NUMBER"
+           dockerImage_green = docker.build registry_green + ":$BUILD_NUMBER"
       }   
     }
    }
@@ -22,8 +24,9 @@ environment{
      steps{
          script {
            docker.withRegistry( '', registryCredential ) {
-           dockerImage.push()
-            }
+           dockerImage_blue.push()
+           dockerImage_green.push()  
+          }
         }
     }
    }
