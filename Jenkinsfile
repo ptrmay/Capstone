@@ -42,7 +42,8 @@ environment{
      }
    stage('Cleaning up'){
     steps{
-       sh "docker rmi $registry:$BUILD_NUMBER"
+       sh "docker rmi $registry_blue:$BUILD_NUMBER"
+       sh "docker rmi $registry_green:$BUILD_NUMBER"
    }
   }
  }
