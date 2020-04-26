@@ -1,0 +1,165 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: >-
+  EKS nodes (AMI family: AmazonLinux2, SSH access: false, private networking:
+  false) [created and managed by eksctl]
+Mappings:
+  ServicePrincipalPartitionMap:
+    aws:
+      EC2: ec2.amazonaws.com
+      EKS: eks.amazonaws.com
+      EKSFargatePods: eks-fargate-pods.amazonaws.com
+    aws-cn:
+      EC2: ec2.amazonaws.com.cn
+      EKS: eks.amazonaws.com
+      EKSFargatePods: eks-fargate-pods.amazonaws.com
+Resources:
+  EgressInterCluster:
+    Type: 'AWS::EC2::SecurityGroupEgress'
+    Properties:
+      Description: >-
+        Allow control plane to communicate with worker nodes in group
+        standard-workers (kubelet and workload TCP ports)
+      DestinationSecurityGroupId: !Ref SG
+      FromPort: 1025
+      GroupId: !ImportValue 'eksctl-capstone3-cluster::SecurityGroup'
+      IpProtocol: tcp
+      ToPort: 65535
+  EgressInterClusterAPI:
+    Type: 'AWS::EC2::SecurityGroupEgress'
+    Properties:
+      Description: >-
+        Allow control plane to communicate with worker nodes in group
+        standard-workers (workloads using HTTPS port, commonly used with
+        extension API servers)
+      DestinationSecurityGroupId: !Ref SG
+      FromPort: 443
+      GroupId: !ImportValue 'eksctl-capstone3-cluster::SecurityGroup'
+      IpProtocol: tcp
+      ToPort: 443
+  IngressInterCluster:
+    Type: 'AWS::EC2::SecurityGroupIngress'
+    Properties:
+      Description: >-
+        Allow worker nodes in group standard-workers to communicate with control
+        plane (kubelet and workload TCP ports)
+      FromPort: 1025
+      GroupId: !Ref SG
+      IpProtocol: tcp
+      SourceSecurityGroupId: !ImportValue 'eksctl-capstone3-cluster::SecurityGroup'
+      ToPort: 65535
+  IngressInterClusterAPI:
+    Type: 'AWS::EC2::SecurityGroupIngress'
+    Properties:
+      Description: >-
+        Allow worker nodes in group standard-workers to communicate with control
+        plane (workloads using HTTPS port, commonly used with extension API
+        servers)
+      FromPort: 443
+      GroupId: !Ref SG
+      IpProtocol: tcp
+      SourceSecurityGroupId: !ImportValue 'eksctl-capstone3-cluster::SecurityGroup'
+      ToPort: 443
+  IngressInterClusterCP:
+    Type: 'AWS::EC2::SecurityGroupIngress'
+    Properties:
+      Description: >-
+        Allow control plane to receive API requests from worker nodes in group
+        standard-workers
+      FromPort: 443
+      GroupId: !ImportValue 'eksctl-capstone3-cluster::SecurityGroup'
+      IpProtocol: tcp
+      SourceSecurityGroupId: !Ref SG
+      ToPort: 443
+  NodeGroup:
+    Type: 'AWS::AutoScaling::AutoScalingGroup'
+    Properties:
+      DesiredCapacity: '2'
+      LaunchTemplate:
+        LaunchTemplateName: !Sub '${AWS::StackName}'
+        Version: !GetAtt NodeGroupLaunchTemplate.LatestVersionNumber
+      MaxSize: '3'
+      MinSize: '1'
+      Tags:
+        - Key: Name
+          PropagateAtLaunch: 'true'
+          Value: capstone3-standard-workers-Node
+        - Key: kubernetes.io/cluster/capstone3
+          PropagateAtLaunch: 'true'
+          Value: owned
+      VPCZoneIdentifier: !Split 
+        - ','
+        - !ImportValue 'eksctl-capstone3-cluster::SubnetsPublic'
+    UpdatePolicy:
+      AutoScalingRollingUpdate:
+        MaxBatchSize: '1'
+        MinInstancesInService: '0'
+  NodeGroupLaunchTemplate:
+    Type: 'AWS::EC2::LaunchTemplate'
+    Properties:
+      LaunchTemplateData:
+        IamInstanceProfile:
+          Arn: !GetAtt NodeInstanceProfile.Arn
+        ImageId: ami-03f38e3da6bae81a9
+        InstanceType: t3.small
+        NetworkInterfaces:
+          - DeviceIndex: 0
+            Groups:
+              - !ImportValue 'eksctl-capstone3-cluster::SharedNodeSecurityGroup'
+              - !Ref SG
+        UserData: >-
+          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
+      LaunchTemplateName: !Sub '${AWS::StackName}'
+  NodeInstanceProfile:
+    Type: 'AWS::IAM::InstanceProfile'
+    Properties:
+      Path: /
+      Roles:
+        - !Ref NodeInstanceRole
+  NodeInstanceRole:
+    Type: 'AWS::IAM::Role'
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+          - Action:
+              - 'sts:AssumeRole'
+            Effect: Allow
+            Principal:
+              Service:
+                - !FindInMap 
+                  - ServicePrincipalPartitionMap
+                  - !Ref 'AWS::Partition'
+                  - EC2
+        Version: 2012-10-17
+      ManagedPolicyArns:
+        - !Sub >-
+          arn:${AWS::Partition}:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly
+        - !Sub 'arn:${AWS::Partition}:iam::aws:policy/AmazonEKSWorkerNodePolicy'
+        - !Sub 'arn:${AWS::Partition}:iam::aws:policy/AmazonEKS_CNI_Policy'
+      Path: /
+  SG:
+    Type: 'AWS::EC2::SecurityGroup'
+    Properties:
+      GroupDescription: >-
+        Communication between the control plane and worker nodes in group
+        standard-workers
+      Tags:
+        - Key: kubernetes.io/cluster/capstone3
+          Value: owned
+        - Key: Name
+          Value: !Sub '${AWS::StackName}/SG'
+      VpcId: !ImportValue 'eksctl-capstone3-cluster::VPC'
+Outputs:
+  FeatureLocalSecurityGroup:
+    Value: true
+  FeaturePrivateNetworking:
+    Value: false
+  FeatureSharedSecurityGroup:
+    Value: true
+  InstanceProfileARN:
+    Export:
+      Name: !Sub '${AWS::StackName}::InstanceProfileARN'
+    Value: !GetAtt NodeInstanceProfile.Arn
+  InstanceRoleARN:
+    Export:
+      Name: !Sub '${AWS::StackName}::InstanceRoleARN'
+    Value: !GetAtt NodeInstanceRole.Arn
