@@ -1,7 +1,7 @@
 pipeline {
 environment{
- registry_blue = "ptrr/capstone_blue"
- registry_green = "ptrr/capstone_green"
+ registry_blue = "ptrr/capstoneblue"
+ registry_green = "ptrr/capstonegreen"
  registryCredential = "e26d40a7-65ed-4a4c-92fe-ac016ab5d94d"
  dockerImage = ""
 }
