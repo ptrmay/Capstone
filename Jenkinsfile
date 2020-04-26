@@ -15,9 +15,13 @@ environment{
     stage('Build Docker Image') {
       steps {
          script {
+          dir("blue"){
            dockerImage_blue = docker.build registry_blue + ":$BUILD_NUMBER"
-           dockerImage_green = docker.build registry_green + ":$BUILD_NUMBER"
-      }   
+           }
+        dir("green"){   
+        dockerImage_green = docker.build registry_green + ":$BUILD_NUMBER"
+      } 
+     }   
     }
    }
    stage('Push Docker Image'){
