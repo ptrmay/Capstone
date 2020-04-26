@@ -17,10 +17,10 @@ environment{
       steps {
          script {
           dir("blue"){
-           dockerImage_blue = docker.build registry_blue + ":$BUILD_NUMBER"
+           dockerImage_blue = docker.build registry_blue
            }
         dir("green"){   
-        dockerImage_green = docker.build registry_green + ":$BUILD_NUMBER"
+        dockerImage_green = docker.build registry_green
       } 
      }   
     }
@@ -53,8 +53,8 @@ environment{
      }
    stage('Cleaning up'){
     steps{
-       sh "docker rmi $registry_blue:$BUILD_NUMBER"
-       sh "docker rmi $registry_green:$BUILD_NUMBER"
+       sh "docker rmi $registry_blue
+       sh "docker rmi $registry_green
    }
   }
  }
